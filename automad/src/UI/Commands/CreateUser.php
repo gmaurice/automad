@@ -77,17 +77,26 @@ class CreateUser extends AbstractCommand {
 		$UserCollectionModel = new UserCollectionModel();
 		$Messenger = new Messenger();
 
-		$name = 'user_' . substr(str_shuffle(MD5(microtime())), 0, 5);
-		$password = substr(str_shuffle(MD5(microtime())), 0, 10);
+		if ( getenv('AM_USERNAME') && getenv('AM_PASSWORD')){
+			$name = getenv('AM_USERNAME');
+			$password = getenv('AM_PASSWORD');
+		} else {
+			$name = 'user_' . substr(str_shuffle(MD5(microtime())), 0, 5);
+			$password = substr(str_shuffle(MD5(microtime())), 0, 10);
+		}
 
 		$UserCollectionModel->createUser($name, $password, $password, '', $Messenger);
 		$UserCollectionModel->save($Messenger);
 
 		if (!$Messenger->getError()) {
-			echo '--------------------' . PHP_EOL;
-			echo 'Name:     ' . $name . PHP_EOL;
-			echo 'Password: ' . $password . PHP_EOL;
-			echo '--------------------' . PHP_EOL;
+			if ( getenv('AM_PASSWORD')){
+				echo 'User account successfully created from environment variables.' . PHP_EOL;
+			} else {
+				echo '--------------------' . PHP_EOL;
+				echo 'Name:     ' . $name . PHP_EOL;
+				echo 'Password: ' . $password . PHP_EOL;
+				echo '--------------------' . PHP_EOL;
+			}
 		} else {
 			echo 'Error! Creating of user account failed.' . PHP_EOL;
 		}
